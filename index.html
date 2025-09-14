@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم چندمنظوره - تبدیل تصویر به بریل و نظرات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        /* تب ها */
+        .tabs {
+            display: flex;
+            background: #4a00e0;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: #4a00e0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-button:hover {
+            background: #3a00c0;
+        }
+        
+        .tab-button.active {
+            background: white;
+            color: #4a00e0;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* استایل های سیستم تبدیل بریل */
+        .braille-container {
+            padding: 25px;
+        }
+        
+        .braille-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .braille-description {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        .upload-container {
+            margin: 20px auto;
+            padding: 30px;
+            border: 3px dashed #3498db;
+            border-radius: 12px;
+            background-color: #ecf0f1;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .upload-container:hover {
+            background-color: #d6eaf8;
+            border-color: #2980b9;
+        }
+        
+        .upload-container p {
+            margin: 0;
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+        
+        .upload-container i {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .braille-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .slider-container {
+            flex: 1;
+            min-width: 280px;
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .slider-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .slider-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            outline: none;
+            border-radius: 5px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2c3e50;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .number-input {
+            width: 70px;
+            padding: 8px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .braille-buttons {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .braille-btn {
+            padding: 14px 28px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        #convertBtn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+        
+        #convertBtn:hover {
+            background: linear-gradient(to right, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        #copyBrailleBtn {
+            background: linear-gradient(to right, #27ae60, #219653);
+            color: white;
+        }
+        
+        #copyBrailleBtn:hover {
+            background: linear-gradient(to right, #219653, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #brailleResult {
+            margin: 30px auto;
+            white-space: pre;
+            font-family: 'Courier New', monospace;
+            line-height: 1.1;
+            overflow: auto;
+            max-height: 70vh;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .braille-info {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        
+        /* استایل های سیستم نظرات */
+        .comments-container {
+            padding: 25px;
+        }
+        
+        .comments-header {
+            background: #4a00e0;
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            position: relative;
+        }
+        
+        .comments-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .comments-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .header-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 32px;
+            opacity: 0.8;
+        }
+        
+        .comment-form {
+            padding: 25px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4a00e0;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 0, 224, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #4a00e0;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background: #3a00c0;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn i {
+            margin-left: 8px;
+        }
+        
+        .comments-list-container {
+            padding: 25px;
+        }
+        
+        .comments-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #4a00e0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .comments-title i {
+            margin-left: 10px;
+        }
+        
+        .comment {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #8a2be2;
+            transition: transform 0.3s;
+        }
+        
+        .comment:hover {
+            transform: translateY(-3px);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .comment-name {
+            font-weight: 700;
+            color: #4a00e0;
+            font-size: 18px;
+        }
+        
+        .comment-date {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .comment-content {
+            color: #555;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #d32f2f;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .empty-comments {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+        }
+        
+        .empty-comments i {
+            font-size: 64px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .setup-info {
+            background: #fff8e1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #ffc107;
+        }
+        
+        .setup-info h3 {
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        
+        .setup-info ol {
+            padding-right: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .setup-info li {
+            margin-bottom: 10px;
+        }
+        
+        .setup-info code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        /* اعلان */
+        .notification {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #27ae60;
+            color: white;
+            padding: 18px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 1000;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .braille-controls, .slider-input-container {
+                flex-direction: column;
+            }
+            
+            .slider-container {
+                width: 100%;
+            }
+            
+            .braille-btn {
+                width: 100%;
+                margin: 10px 0;
+            }
+            
+            #brailleResult {
+                font-size: 14px;
+                max-height: 50vh;
+            }
+            
+            .number-input {
+                width: 100%;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .comment-date {
+                margin-top: 5px;
+            }
+        }
+</style>
+  </head>
+  <body>
+    <div class="main-container">
+	  <!-- تب ها -->
+	  <div class="tabs">
+		<button class="tab-button active" data-tab="braille">
+		  <i class="fas fa-image"></i> تبدیل تصویر به بریل
+		</button>
+		<button class="tab-button" data-tab="comments">
+		  <i class="fas fa-comments"></i> سیستم نظرات
+		</button>
+	  </div>
+
+	  <!-- محتوای تب تبدیل تصویر به بریل -->
+	  <div id="braille-tab" class="tab-content active">
+		<div class="braille-container">
+		  <h1 class="braille-title">تبدیل تصویر به نقاط بریل با کیفیت بالا</h1>
+		  <p class="braille-description">با استفاده از این ابزار می‌توانید تصاویر را با کیفیت بالا به نقاط بریل تبدیل کنید و نتیجه را کپی نمایید.</p>
+
+		  <div class="upload-container" onclick="document.getElementById('imageUpload').click()">
+			<i class="fas fa-file-upload"></i>
+			<p>برای انتخاب تصویر کلیک کنید یا آن را اینجا رها کنید</p>
+		  </div>
+
+		  <input type="file" id="imageUpload" accept="image/*">
+
+		  <div class="braille-controls">
+			<div class="slider-container">
+			  <label for="widthSlider" class="slider-label">عرض خروجی (کاراکتر)</label>
+			  <input type="range" id="widthSlider" min="10" max="200" value="50">
+			  <div class="slider-input-container">
+				<span>مقدار:</span>
+				<input type="number" id="widthInput" class="number-input" min="10" max="200" value="50">
+			  </div>
+			</div>
+
+			<div class="slider-container">
+			  <label for="heightSlider" class="slider-label">ارتفاع خروجی (خط)</label>
+			  <input type="range" id="heightSlider" min="10" max="200" value="60">
+			  <div class="slider-input-container">
+				<span>مقدار:</span>
+				<input type="number" id="heightInput" class="number-input" min="10" max="200" value="60">
+			  </div>
+			</div>
+
+			<div class="slider-container">
+			  <label for="thresholdSlider" class="slider-label">آستانه روشنایی</label>
+			  <input type="range" id="thresholdSlider" min="0" max="255" value="128">
+			  <div class="slider-input-container">
+				<span>مقدار:</span>
+				<input type="number" id="thresholdInput" class="number-input" min="0" max="255" value="128">
+			  </div>
+			</div>
+
+			<div class="slider-container">
+			  <label for="densitySlider" class="slider-label">تراکم نقاط</label>
+			  <input type="range" id="densitySlider" min="1" max="5" value="3" step="0.5">
+			  <div class="slider-input-container">
+				<span>مقدار:</span>
+				<input type="number" id="densityInput" class="number-input" min="1" max="5" value="3" step="0.1">
+			  </div>
+			</div>
+		  </div>
+
+		  <div class="braille-buttons">
+			<button id="convertBtn" class="braille-btn">تبدیل به بریل</button>
+			<button id="copyBrailleBtn" class="braille-btn">کپی کردن نتیجه</button>
+		  </div>
+
+		  <div id="brailleResult"></div>
+
+		  <div class="braille-info">
+			<p>نتیجه تبدیل به صورت کاراکترهای بریل یونیکد نمایش داده می‌شود. برای بهترین نتیجه، از تصاویر با کنتراست بالا استفاده کنید.</p>
+			<p>عرض کمتر (حدود ۵۰ کاراکتر) برای جلوگیری از به هم ریختگی در صفحه تایپ توصیه می‌شود.</p>
+		  </div>
+		</div>
+	  </div>
+
+	  <!-- محتوای تب سیستم نظرات -->
+	  <div id="comments-tab" class="tab-content">
+		<div class="comments-container">
+		  <header class="comments-header">
+			<i class="fas fa-comments header-icon"></i>
+			<h1>سیستم انتشار نظر جهانی</h1>
+			<p>نظرات خود را با جهان به اشتراک بگذارید</p>
+		  </header>
+
+		  <div class="setup-info">
+			<h3><i class="fas fa-info-circle"></i> راهنمای راه‌اندازی</h3>
+			<ol>
+			  <li>برای استفاده از این سیستم، نیاز به ایجاد Bin در سایت jsonbin.io دارید</li>
+			  <li>پس از ساخت حساب کاربری، یک Bin جدید ایجاد کنید</li>
+			  <li>ساختار داده‌ها باید به صورت زیر باشد: <code>{"comments": []}</code></li>
+			  <li>مقادیر Bin ID و API Key خود را در کد جایگذاری کرده‌ام</li>
+			  <li>سیستم آماده استفاده است!</li>
+			</ol>
+			<p>برای اطلاعات بیشتر به <a href="https://jsonbin.io/" target="_blank">سایت jsonbin.io</a> مراجعه کنید.</p>
+		  </div>
+
+		  <div class="comment-form">
+			<div id="error-message" class="error"></div>
+			<div id="success-message" class="success"></div>
+
+			<div class="form-group">
+			  <label for="name">نام شما:</label>
+			  <input type="text" id="name" class="form-control" placeholder="نام خود را وارد کنید">
+			</div>
+
+			<div class="form-group">
+			  <label for="comment">نظر شما:</label>
+			  <textarea id="comment" class="form-control" placeholder="نظر خود را اینجا بنویسید..."></textarea>
+			</div>
+
+			<button id="submit-btn" class="btn">
+			  <i class="fas fa-paper-plane"></i> ارسال نظر
+			</button>
+		  </div>
+
+		  <div class="comments-list-container">
+			<h2 class="comments-title">
+			  <i class="fas fa-comment-dots"></i> نظرات کاربران
+			</h2>
+			<div id="comments-list">
+			  <div class="loading">
+				<i class="fas fa-spinner fa-spin"></i> در حال بارگذاری نظرات...
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+    </div>
+
+    <div class="notification" id="notification">متن با موفقیت کپی شد!</div>
+
+    <footer>
+	  <p>ساخته شده با ❤️ | سیستم چندمنظوره تبدیل تصویر به بریل و نظرات</p>
+    </footer>
+
+<script>
+        // مدیریت تب ها
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // حذف کلاس active از همه دکمه ها و محتواها
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // افزودن کلاس active به دکمه و محتوای مربوطه
+                button.classList.add('active');
+                document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // تنظیمات JSONBin.io
+        const binId = '68c67dafd0ea881f407d6972';
+        const apiKey = '$2a$10$amDyKr2mNH7W9gbGWIvxlOpErw6tPJ8gfFfUzR45weNznn/rwU6i.';
+        const apiUrl = `https://api.jsonbin.io/v3/b/${binId}`;
+        
+        // المنت های DOM
+        const nameInput = document.getElementById('name');
+        const commentInput = document.getElementById('comment');
+        const submitBtn = document.getElementById('submit-btn');
+        const commentsList = document.getElementById('comments-list');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        
+        // رویداد کلیک برای دکمه ارسال نظر
+        submitBtn.addEventListener('click', async () => {
+            const name = nameInput.value.trim();
+            const commentText = commentInput.value.trim();
+            
+            // اعتبارسنجی
+            if (!name || !commentText) {
+                showError('لطفاً نام و نظر خود را وارد کنید.');
+                return;
+            }
+            
+            if (name.length < 2) {
+                showError('نام باید حداقل ۲ حرف باشد.');
+                return;
+            }
+            
+            if (commentText.length < 10) {
+                showError('نظر باید حداقل ۱۰ حرف باشد.');
+                return;
+            }
+            
+            try {
+                // غیرفعال کردن دکمه جهت جلوگیری از ارسال های تکراری
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ارسال...';
+                
+                // دریافت نظرات موجود
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('خطا در دریافت داده‌ها از سرور');
+                }
+                
+                const data = await response.json();
+                const comments = data.record?.comments || [];
+                
+                // افزودن نظر جدید
+                const newComment = {
+                    id: Date.now(),
+                    name,
+                    comment: commentText,
+                    timestamp: new Date().toISOString()
+                };
+                
+                comments.unshift(newComment);
+                
+                // به‌روزرسانی Bin
+                const updateResponse = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': apiKey
+                    },
+                    body: JSON.stringify({ comments })
+                });
+                
+                if (!updateResponse.ok) {
+                    throw new Error('خطا در ارسال نظر به سرور');
+                }
+                
+                // پاک کردن فرم و نمایش پیام موفقیت
+                nameInput.value = '';
+                commentInput.value = '';
+                errorMessage.style.display = 'none';
+                showSuccess('نظر شما با موفقیت ثبت شد!');
+                
+                // نمایش نظرات
+                displayComments(comments);
+                
+            } catch (error) {
+                showError('خطا در ارسال نظر: ' + error.message);
+            } finally {
+                // فعال کردن دکمه
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ارسال نظر';
+            }
+        });
+        
+        // تابع برای نمایش خطا
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            // مخفی کردن خودکار پیام خطا پس از ۵ ثانیه
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // تابع برای نمایش موفقیت
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // مخفی کردن خودکار پیام موفقیت پس از ۵ ثانیه
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // تابع برای نمایش نظرات
+        function displayComments(comments) {
+            if (comments.length === 0) {
+                commentsList.innerHTML = 
+                    `<div class="empty-comments">
+                        <i class="far fa-comments"></i>
+                        <p>هنوز نظری ارسال نشده است. اولین نفری باشید که نظر می‌دهد!</p>
+                    </div>`;
+                return;
+            }
+            
+            commentsList.innerHTML = comments.map(comment => 
+                `<div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-name">${escapeHtml(comment.name)}</span>
+                        <span class="comment-date">${formatDate(comment.timestamp)}</span>
+                    </div>
+                    <p class="comment-content">${escapeHtml(comment.comment)}</p>
+                </div>`
+            ).join('');
+        }
+        
+        // تابع برای ایمن‌سازی HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // تابع برای فرمت تاریخ
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('fa-IR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+        
+        // بارگذاری اولیه نظرات
+        async function loadComments() {
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'X-Master-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('خطا در دریافت نظرات');
+                }
+                
+                const data = await response.json();
+                const comments = data.record?.comments || [];
+                displayComments(comments);
+                
+            } catch (error) {
+                commentsList.innerHTML = 
+                    `<div class="error">
+                        خطا در بارگذاری نظرات: ${error.message}
+                    </div>`;
+            }
+        }
+        
+        // بارگذاری نظرات هنگام شروع
+        loadComments();
+        
+        // کدهای مربوط به سیستم تبدیل بریل
+        const widthSlider = document.getElementById('widthSlider');
+        const widthInput = document.getElementById('widthInput');
+        const heightSlider = document.getElementById('heightSlider');
+        const heightInput = document.getElementById('heightInput');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const thresholdInput = document.getElementById('thresholdInput');
+        const densitySlider = document.getElementById('densitySlider');
+        const densityInput = document.getElementById('densityInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const copyBrailleBtn = document.getElementById('copyBrailleBtn');
+        
+        // همگام‌سازی اسلایدرها و فیلدهای عددی
+        function syncInputAndSlider(slider, input) {
+            slider.addEventListener('input', function() {
+                input.value = this.value;
+            });
+            
+            input.addEventListener('input', function() {
+                let value = parseFloat(this.value);
+                const min = parseFloat(this.min);
+                const max = parseFloat(this.max);
+                
+                if (isNaN(value)) return;
+                
+                value = Math.min(Math.max(value, min), max);
+                this.value = value;
+                slider.value = value;
+            });
+        }
+        
+        // راه‌اندازی همگام‌سازی برای همه کنترل‌ها
+        syncInputAndSlider(widthSlider, widthInput);
+        syncInputAndSlider(heightSlider, heightInput);
+        syncInputAndSlider(thresholdSlider, thresholdInput);
+        syncInputAndSlider(densitySlider, densityInput);
+        
+        // مدیریت آپلود با کشیدن و رها کردن
+        const uploadContainer = document.querySelector('.upload-container');
+        const fileInput = document.getElementById('imageUpload');
+        
+        uploadContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadContainer.style.background = '#d6eaf8';
+            uploadContainer.style.borderColor = '#2980b9';
+        });
+        
+        uploadContainer.addEventListener('dragleave', () => {
+            uploadContainer.style.background = '#ecf0f1';
+            uploadContainer.style.borderColor = '#3498db';
+        });
+        
+        uploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadContainer.style.background = '#ecf0f1';
+            uploadContainer.style.borderColor = '#3498db';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+            }
+        });
+        
+        // نمایش اعلان
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.style.opacity = '1';
+            setTimeout(() => {
+                notification.style.opacity = '0';
+            }, 2000);
+        }
+        
+        // تابع کپی به کلیپ‌بورد برای بریل
+        copyBrailleBtn.addEventListener('click', () => {
+            const resultText = document.getElementById('brailleResult').textContent;
+            if (!resultText.trim()) {
+                alert('لطفاً ابتدا یک تصویر را تبدیل کنید');
+                return;
+            }
+            
+            // ایجاد یک عنصر موقت برای کپی
+            const textArea = document.createElement('textarea');
+            textArea.value = resultText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showNotification();
+                } else {
+                    alert('خطا در کپی کردن متن. لطفاً دوباره尝试 کنید.');
+                }
+            } catch (err) {
+                alert('خطا در کپی کردن متن: ' + err);
+            }
+            
+            document.body.removeChild(textArea);
+        });
+        
+        // تابع تبدیل به بریل
+        convertBtn.addEventListener('click', () => {
+            const fileInput = document.getElementById('imageUpload');
+            const resultDiv = document.getElementById('brailleResult');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('لطفا یک تصویر انتخاب کنید');
+                return;
+            }
+            
+            convertBtn.disabled = true;
+            convertBtn.textContent = 'در حال تبدیل...';
+            
+            const file = fileInput.files[0];
+            const targetWidth = parseInt(widthInput.value);
+            const targetHeight = parseInt(heightInput.value);
+            const threshold = parseInt(thresholdInput.value);
+            const density = parseFloat(densityInput.value);
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // محاسبه ابعاد با حفظ نسبت ابعاد تصویر
+                    const aspectRatio = img.height / img.width;
+                    const finalWidth = Math.min(targetWidth, 200);
+                    const finalHeight = Math.min(targetHeight, Math.floor(finalWidth * aspectRatio * density / 2));
+                    
+                    // ایجاد کانvas برای پردازش تصویر
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // تنظیم اندازه canvas
+                    canvas.width = finalWidth;
+                    canvas.height = finalHeight * 2; // چون هر کاراکتر بریل دو نقطه ارتفاع دارد
+                    
+                    // رسم تصویر در canvas
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // دریافت داده‌های پیکسل
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+                    
+                    // تولید کاراکترهای بریل
+                    let brailleArt = '';
+                    
+                    // هر کاراکتر بریل 2x4 نقطه را نمایش می‌دهد
+                    for (let y = 0; y < canvas.height; y += 4) {
+                        for (let x = 0; x < canvas.width; x += 2) {
+                            // محاسبه کد نقطه‌های بریل برای این سلول 2x4
+                            let brailleCode = 0;
+                            
+                            // بررسی هر نقطه در سلول 2x4
+                            for (let row = 0; row < 4; row++) {
+                                for (let col = 0; col < 2; col++) {
+                                    const px = x + col;
+                                    const py = y + row;
+                                    
+                                    // اگر در محدوده canvas باشد
+                                    if (px < canvas.width && py < canvas.height) {
+                                        const index = (py * canvas.width + px) * 4;
+                                        const r = pixels[index];
+                                        const g = pixels[index + 1];
+                                        const b = pixels[index + 2];
+                                        
+                                        // محاسبه روشنایی با فرمول وزندار
+                                        const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                                        
+                                        // اگر تاریک‌تر از آستانه باشد، نقطه فعال می‌شود
+                                        if (brightness < threshold) {
+                                            // تعیین موقعیت نقطه در کاراکتر بریل
+                                            let dotPosition;
+                                            if (col === 0 && row === 0) dotPosition = 1; // نقطه بالا چپ
+                                            else if (col === 0 && row === 1) dotPosition = 2; // نقطه وسط چپ
+                                            else if (col === 0 && row === 2) dotPosition = 3; // نقطه پایین چپ
+                                            else if (col === 1 && row === 0) dotPosition = 4; // نقطه بالا راست
+                                            else if (col === 1 && row === 1) dotPosition = 5; // نقطه وسط راست
+                                            else if (col === 1 && row === 2) dotPosition = 6; // نقطه پایین راست
+                                            else if (col === 0 && row === 3) dotPosition = 7; // نقطه انتهایی چپ
+                                            else if (col === 1 && row === 3) dotPosition = 8; // نقطه انتهایی راست
+                                            
+                                            // فعال کردن بیت مربوطه
+                                            if (dotPosition) {
+                                                brailleCode |= (1 << (dotPosition - 1));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // تبدیل کد به کاراکتر بریل
+                            // کاراکترهای بریل در یونیکد از 0x2800 شروع می‌شوند
+                            brailleArt += String.fromCharCode(0x2800 + brailleCode);
+                        }
+                        brailleArt += '\n';
+                    }
+                    
+                    // نمایش نتیجه
+                    resultDiv.textContent = brailleArt;
+                    
+                    convertBtn.disabled = false;
+                    convertBtn.textContent = 'تبدیل به بریل';
+                };
+                img.src = e.target.result;
+            };
+            
+            reader.readAsDataURL(file);
+        });
+</script>
+  </body>
+</html>
